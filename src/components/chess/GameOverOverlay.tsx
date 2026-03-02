@@ -21,86 +21,82 @@ export function GameOverOverlay() {
     return null;
   }
 
+  let emoji = '';
   let title = '';
   let subtitle = '';
+  let isWin = false;
 
   if (gameStatus === 'checkmate') {
     const winner = chess.turn() === 'w' ? 'Black' : 'White';
-    const isPlayerWinner =
+    isWin =
       (winner === 'White' && playerColor === 'w') ||
       (winner === 'Black' && playerColor === 'b');
-    title = isPlayerWinner ? 'You Won!' : 'You Lost';
+    emoji = isWin ? '🏆' : '😔';
+    title = isWin ? 'You Won!' : 'You Lost';
     subtitle = `${winner} wins by checkmate`;
   } else if (gameStatus === 'stalemate') {
+    emoji = '🤝';
     title = 'Stalemate';
-    subtitle = 'Draw - no legal moves';
+    subtitle = 'No legal moves remaining';
   } else {
+    emoji = '🤝';
     title = 'Draw';
-    subtitle =
-      chess.isThreefoldRepetition()
-        ? 'Draw by repetition'
-        : chess.isInsufficientMaterial()
-          ? 'Draw - insufficient material'
-          : 'Draw';
+    subtitle = chess.isThreefoldRepetition()
+      ? 'Draw by repetition'
+      : chess.isInsufficientMaterial()
+        ? 'Insufficient material'
+        : 'Game drawn';
   }
-
-  const handleNewGame = () => {
-    resetGame();
-  };
-
-  const handleGoHome = () => {
-    router.back();
-  };
 
   return (
     <Animated.View
-      entering={FadeIn.duration(300)}
-      style={[styles.overlay, { backgroundColor: 'rgba(0,0,0,0.7)' }]}
+      entering={FadeIn.duration(250)}
+      style={styles.overlay}
     >
       <Animated.View
-        entering={ZoomIn.delay(150).springify()}
-        style={[styles.content, { backgroundColor: colors.surface }]}
+        entering={ZoomIn.delay(120).springify()}
+        style={[styles.card, { backgroundColor: colors.surface }]}
       >
+        <Text style={styles.emoji}>{emoji}</Text>
         <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           {subtitle}
         </Text>
-        <View style={styles.buttons}>
-          <Pressable
-            onPress={() => router.push('/analysis')}
-            style={({ pressed }) => [
-              styles.button,
-              { borderColor: colors.border, borderWidth: 2 },
-              pressed && { opacity: 0.8 },
-            ]}
-          >
-            <Text style={[styles.buttonTextSecondary, { color: colors.text }]}>
-              View Analysis
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={handleNewGame}
-            style={({ pressed }) => [
-              styles.button,
-              { backgroundColor: colors.primary },
-              pressed && { opacity: 0.9 },
-            ]}
-          >
-            <Text style={styles.buttonText}>Play Again</Text>
-          </Pressable>
-          <Pressable
-            onPress={handleGoHome}
-            style={({ pressed }) => [
-              styles.button,
-              { borderColor: colors.border, borderWidth: 2 },
-              pressed && { opacity: 0.8 },
-            ]}
-          >
-            <Text style={[styles.buttonTextSecondary, { color: colors.text }]}>
-              Home
-            </Text>
-          </Pressable>
-        </View>
+
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+        <Pressable
+          onPress={resetGame}
+          style={({ pressed }) => [
+            styles.primaryBtn,
+            { backgroundColor: colors.primary },
+            pressed && { opacity: 0.85 },
+          ]}
+        >
+          <Text style={styles.primaryBtnText}>New Game</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => router.push('/analysis')}
+          style={({ pressed }) => [
+            styles.secondaryBtn,
+            { backgroundColor: colors.border },
+            pressed && { opacity: 0.75 },
+          ]}
+        >
+          <Text style={[styles.secondaryBtnText, { color: colors.text }]}>
+            View Analysis
+          </Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => router.back()}
+          style={({ pressed }) => [pressed && { opacity: 0.7 }]}
+        >
+          <Text style={[styles.linkText, { color: colors.textTertiary }]}>
+            Back to Home
+          </Text>
+        </Pressable>
       </Animated.View>
     </Animated.View>
   );
@@ -109,47 +105,68 @@ export function GameOverOverlay() {
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.78)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
-  content: {
-    padding: 32,
-    borderRadius: 16,
+  card: {
     width: '100%',
     maxWidth: 320,
+    borderRadius: 14,
+    padding: 28,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  emoji: {
+    fontSize: 48,
+    marginBottom: 12,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 8,
+    fontSize: 26,
+    fontWeight: '800',
+    marginBottom: 6,
+    letterSpacing: -0.3,
   },
   subtitle: {
     fontSize: 14,
-    marginBottom: 24,
+    marginBottom: 20,
+    textAlign: 'center',
   },
-  buttons: {
+  divider: {
     width: '100%',
-    gap: 12,
+    height: 1,
+    marginBottom: 20,
   },
-  button: {
-    padding: 16,
-    borderRadius: 12,
+  primaryBtn: {
+    width: '100%',
+    paddingVertical: 15,
+    borderRadius: 8,
     alignItems: 'center',
+    marginBottom: 10,
   },
-  buttonText: {
+  primaryBtnText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: '700',
+  },
+  secondaryBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  secondaryBtnText: {
+    fontSize: 15,
     fontWeight: '600',
   },
-  buttonTextSecondary: {
-    fontSize: 16,
-    fontWeight: '600',
+  linkText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
 });

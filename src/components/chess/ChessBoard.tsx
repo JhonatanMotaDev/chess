@@ -21,53 +21,45 @@ function ChessBoardComponent() {
 
   const squares = getBoardSquares(boardFlipped);
   const boardSize = Dimensions.get('window').width - 32;
-  const squareSize = boardSize / 8;
-  const coordSize = 16;
-  const totalSize = boardSize + coordSize;
 
   const fileOrder = boardFlipped ? [...FILES].reverse() : FILES;
   const rankOrder = boardFlipped ? [...RANKS].reverse() : RANKS;
 
   const handleSquarePress = useCallback(
-    (square: Square) => {
-      selectSquare(square);
-    },
+    (square: Square) => selectSquare(square),
     [selectSquare]
   );
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.coordRow, { width: totalSize }]}>
-        <View style={[styles.rankCoord, { width: coordSize }]} />
-        {fileOrder.map((f) => (
-          <View key={f} style={[styles.fileCoord, { width: squareSize }]}>
-            <Text style={[styles.coordText, { color: colors.textTertiary }]}>{f}</Text>
-          </View>
-        ))}
-      </View>
-      <View style={styles.boardRow}>
-        <View style={[styles.rankCoords, { width: coordSize, height: boardSize }]}>
-          {rankOrder.map((r) => (
-            <View key={r} style={[styles.rankCoordItem, { height: squareSize }]}>
-              <Text style={[styles.coordText, { color: colors.textTertiary }]}>{r}</Text>
-            </View>
-          ))}
-        </View>
-        <View style={[styles.board, { width: boardSize, height: boardSize }]}>
-          {squares.map((square) => {
+    <View
+      style={[
+        styles.board,
+        {
+          width: boardSize,
+          height: boardSize,
+          borderColor: colors.border,
+        },
+      ]}
+    >
+      {squares.map((square) => {
         const file = square[0];
         const rank = square[1];
-        const isLight =
-          (file.charCodeAt(0) - 97 + parseInt(rank, 10)) % 2 === 1;
+        const fileIdx = fileOrder.indexOf(file);
+        const rankIdx = rankOrder.indexOf(rank);
+        const isLight = (file.charCodeAt(0) - 97 + parseInt(rank, 10)) % 2 === 1;
         const piece = chess.get(square);
         const isSelected = selectedSquare === square;
         const isHighlighted = legalMoves.includes(square);
-        const isLastMove =
-          lastMove?.from === square || lastMove?.to === square;
+        const isLastMove = lastMove?.from === square || lastMove?.to === square;
         const isCheck =
           piece?.type === 'k' &&
           chess.inCheck() &&
           piece.color === chess.turn();
+
+        // Coordinates embedded inside edge squares — like Chess.com
+        const showRank = fileIdx === 0;
+        const showFile = rankIdx === 7;
+        const coordColor = isLight ? colors.boardDark : colors.boardLight;
 
         return (
           <View key={square} style={styles.squareWrapper}>
@@ -78,8 +70,31 @@ function ChessBoardComponent() {
               isHighlighted={isHighlighted}
               isLastMove={isLastMove}
               isCheck={isCheck}
+              hasPiece={!!piece}
               onPress={() => handleSquarePress(square)}
             />
+
+            {/* Rank label — top-left of left-edge squares */}
+            {showRank && (
+              <Text
+                style={[styles.coordRank, { color: coordColor }]}
+                pointerEvents="none"
+              >
+                {rank}
+              </Text>
+            )}
+
+            {/* File label — bottom-right of bottom-edge squares */}
+            {showFile && (
+              <Text
+                style={[styles.coordFile, { color: coordColor }]}
+                pointerEvents="none"
+              >
+                {file}
+              </Text>
+            )}
+
+            {/* Piece rendered on top */}
             {piece && (
               <View style={StyleSheet.absoluteFill} pointerEvents="none">
                 <View style={styles.pieceContainer}>
@@ -90,8 +105,6 @@ function ChessBoardComponent() {
           </View>
         );
       })}
-        </View>
-      </View>
     </View>
   );
 }
@@ -99,37 +112,16 @@ function ChessBoardComponent() {
 export const ChessBoard = memo(ChessBoardComponent);
 
 const styles = StyleSheet.create({
-  container: {
-    alignSelf: 'center',
-  },
-  coordRow: {
-    flexDirection: 'row',
-    paddingLeft: 16,
-    marginBottom: 2,
-  },
-  rankCoord: {},
-  fileCoord: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  boardRow: {
-    flexDirection: 'row',
-  },
-  rankCoords: {
-    justifyContent: 'space-around',
-    paddingTop: 2,
-  },
-  rankCoordItem: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  coordText: {
-    fontSize: 11,
-    fontWeight: '500',
-  },
   board: {
+    alignSelf: 'center',
     flexDirection: 'row',
     flexWrap: 'wrap',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 12,
   },
   squareWrapper: {
     width: '12.5%',
@@ -139,5 +131,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  coordRank: {
+    position: 'absolute',
+    top: 2,
+    left: 3,
+    fontSize: 10,
+    fontWeight: '700',
+    opacity: 0.9,
+  },
+  coordFile: {
+    position: 'absolute',
+    bottom: 2,
+    right: 3,
+    fontSize: 10,
+    fontWeight: '700',
+    opacity: 0.9,
   },
 });

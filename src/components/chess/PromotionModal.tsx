@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Dimensions,
-} from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { Modal, View, Text, StyleSheet, Pressable } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useTheme } from '@/theme';
 import { useGameStore } from '@/store/gameStore';
 
@@ -22,44 +15,38 @@ export function PromotionModal() {
   const { colors } = useTheme();
   const pendingPromotion = useGameStore((s) => s.pendingPromotion);
   const promotePawn = useGameStore((s) => s.promotePawn);
-  const playerColor = useGameStore((s) => s.playerColor);
 
   if (!pendingPromotion) return null;
-
-  const handleSelect = (piece: 'q' | 'r' | 'b' | 'n') => {
-    promotePawn(piece);
-  };
 
   return (
     <Modal transparent visible animationType="fade">
       <Animated.View
-        entering={FadeIn.duration(200)}
-        exiting={FadeOut.duration(200)}
-        style={[styles.overlay, { backgroundColor: colors.promotion }]}
+        entering={FadeIn.duration(180)}
+        style={styles.overlay}
       >
-        <Animated.View
-          entering={FadeIn.delay(100).springify()}
-          style={[styles.content, { backgroundColor: colors.surface }]}
-        >
-          <Text style={[styles.title, { color: colors.text }]}>
-            Promote pawn to
+        <View style={[styles.card, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.title, { color: colors.textSecondary }]}>
+            PROMOTE PAWN
           </Text>
           <View style={styles.piecesRow}>
             {PIECES.map((p) => (
               <Pressable
                 key={p.key}
-                onPress={() => handleSelect(p.key)}
+                onPress={() => promotePawn(p.key)}
                 style={({ pressed }) => [
-                  styles.pieceButton,
-                  { borderColor: colors.border },
-                  pressed && { opacity: 0.8 },
+                  styles.pieceBtn,
+                  { backgroundColor: colors.border },
+                  pressed && { opacity: 0.75, transform: [{ scale: 0.95 }] },
                 ]}
               >
                 <Text style={styles.pieceSymbol}>{p.symbol}</Text>
+                <Text style={[styles.pieceLabel, { color: colors.textTertiary }]}>
+                  {p.label}
+                </Text>
               </Pressable>
             ))}
           </View>
-        </Animated.View>
+        </View>
       </Animated.View>
     </Modal>
   );
@@ -68,39 +55,47 @@ export function PromotionModal() {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.78)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
-  content: {
+  card: {
+    borderRadius: 14,
     padding: 24,
-    borderRadius: 16,
-    minWidth: 280,
+    alignItems: 'center',
+    minWidth: 300,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    elevation: 12,
   },
   title: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.5,
     marginBottom: 20,
-    textAlign: 'center',
   },
   piecesRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    gap: 10,
   },
-  pieceButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 12,
-    borderWidth: 2,
+  pieceBtn: {
+    width: 64,
+    height: 72,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 4,
   },
   pieceSymbol: {
-    fontSize: 32,
+    fontSize: 34,
+    color: '#f0ead8',
+  },
+  pieceLabel: {
+    fontSize: 9,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
 });

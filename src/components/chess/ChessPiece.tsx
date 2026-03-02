@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { StyleSheet } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -11,48 +11,59 @@ interface ChessPieceProps {
   isDragging?: boolean;
 }
 
-const PIECE_MAP: Record<string, string> = {
-  wp: '♙',
-  wn: '♘',
-  wb: '♗',
-  wr: '♖',
-  wq: '♕',
-  wk: '♔',
-  bp: '♟',
-  bn: '♞',
-  bb: '♝',
-  br: '♜',
-  bq: '♛',
-  bk: '♚',
+const PIECE_IMAGES: Record<string, any> = {
+  wk: require('../../../assets/pieces/wk.png'),
+  wq: require('../../../assets/pieces/wq.png'),
+  wr: require('../../../assets/pieces/wr.png'),
+  wb: require('../../../assets/pieces/wb.png'),
+  wn: require('../../../assets/pieces/wn.png'),
+  wp: require('../../../assets/pieces/wp.png'),
+  bk: require('../../../assets/pieces/bk.png'),
+  bq: require('../../../assets/pieces/bq.png'),
+  br: require('../../../assets/pieces/br.png'),
+  bb: require('../../../assets/pieces/bb.png'),
+  bn: require('../../../assets/pieces/bn.png'),
+  bp: require('../../../assets/pieces/bp.png'),
 };
 
-function ChessPieceComponent({ piece, color }: ChessPieceProps) {
-  const symbol = PIECE_MAP[`${color}${piece}`] || '';
+function ChessPieceComponent({ piece, color, isDragging = false }: ChessPieceProps) {
+  const key = `${color}${piece}`;
+  const imageSource = PIECE_IMAGES[key];
 
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    transform: [{ scale: isDragging ? 1.1 : scale.value }],
+    opacity: isDragging ? 0.85 : 1,
   }));
 
+  if (!imageSource) return null;
+
   return (
-    <Animated.Text
-      style={[styles.piece, animatedStyle]}
-      allowFontScaling={false}
-    >
-      {symbol}
-    </Animated.Text>
+    <Animated.View style={[styles.container, animatedStyle]}>
+      <Image
+        source={imageSource}
+        style={styles.image}
+        resizeMode="contain"
+        fadeDuration={0}
+      />
+    </Animated.View>
   );
 }
 
 export const ChessPiece = memo(ChessPieceComponent);
 
 const styles = StyleSheet.create({
-  piece: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
+  container: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  image: {
+    width: '85%',
+    height: '85%',
+    backgroundColor: 'transparent',
   },
 });

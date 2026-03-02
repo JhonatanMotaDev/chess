@@ -3,8 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useTheme } from '@/theme';
 import { useGameStore } from '@/store/gameStore';
 import { useSettingsStore } from '@/store/settingsStore';
-import { formatMovelist } from '@/utils/chessUtils';
-import { PIECE_SYMBOLS } from '@/utils/chessUtils';
+import { formatMovelist, PIECE_SYMBOLS } from '@/utils/chessUtils';
 
 function GamePanelComponent() {
   const { colors } = useTheme();
@@ -15,7 +14,6 @@ function GamePanelComponent() {
   const flipBoard = useGameStore((s) => s.flipBoard);
   const undoMove = useGameStore((s) => s.undoMove);
   const resetGame = useGameStore((s) => s.resetGame);
-  const gameStatus = useGameStore((s) => s.gameStatus);
   const { playerElo, engineElo } = useSettingsStore();
   const difficulty = useGameStore((s) => s.difficulty);
   const undoEnabled = useSettingsStore((s) => s.undoEnabled);
@@ -30,113 +28,141 @@ function GamePanelComponent() {
     return PIECE_SYMBOLS[key] || piece;
   };
 
+  const PlayerRow = ({
+    label,
+    rating,
+    color,
+    captured,
+    capturedColor,
+    isThinking,
+  }: {
+    label: string;
+    rating: string | number;
+    color: 'w' | 'b';
+    captured: string[];
+    capturedColor: 'w' | 'b';
+    isThinking?: boolean;
+  }) => (
+    <View style={[styles.playerRow, { borderBottomColor: colors.border }]}>
+      <View
+        style={[
+          styles.avatar,
+          {
+            backgroundColor: color === 'w' ? '#e8e0d0' : '#2a2520',
+            borderColor: colors.border,
+          },
+        ]}
+      >
+        <Text style={{ fontSize: 16 }}>{color === 'w' ? '♔' : '♚'}</Text>
+      </View>
+      <View style={styles.playerMeta}>
+        <View style={styles.playerNameRow}>
+          <Text style={[styles.playerName, { color: colors.text }]}>{label}</Text>
+          <Text style={[styles.playerRating, { color: colors.textTertiary }]}>
+            ({rating})
+          </Text>
+          {isThinking && (
+            <View style={[styles.thinkingDot, { backgroundColor: colors.primary }]} />
+          )}
+        </View>
+        <Text style={[styles.capturedPieces, { color: colors.textSecondary }]}>
+          {captured.length > 0
+            ? captured.map((p, i) => getPieceSymbol(p, capturedColor)).join('')
+            : ''}
+        </Text>
+      </View>
+    </View>
+  );
+
   return (
     <View style={[styles.container, { backgroundColor: colors.surface }]}>
-      <View style={[styles.playersRow, { borderBottomColor: colors.border }]}>
-        <View style={styles.playerInfo}>
-          <View style={[styles.playerIndicator, { backgroundColor: colors.primary }]} />
-          <Text style={[styles.playerName, { color: colors.text }]}>You</Text>
-          <Text style={[styles.rating, { color: colors.textTertiary }]}>{playerElo}</Text>
-        </View>
-        {isEngineThinking && (
-          <Text style={[styles.thinking, { color: colors.primary }]}>
-            Thinking...
-          </Text>
-        )}
-        <View style={styles.playerInfo}>
-          <View style={[styles.playerIndicator, { backgroundColor: colors.textTertiary }]} />
-          <Text style={[styles.playerName, { color: colors.text }]}>Computer</Text>
-          <Text style={[styles.rating, { color: colors.textTertiary }]}>
-            {engineElo[difficulty]}
-          </Text>
-        </View>
-      </View>
 
-      <View style={[styles.capturedRow, { borderBottomColor: colors.border }]}>
-        <View style={styles.capturedSection}>
-          <Text style={[styles.capturedLabel, { color: colors.textSecondary }]}>
-            You captured:
-          </Text>
-          <Text style={styles.capturedPieces}>
-            {capturedByPlayer.map((p, i) => (
-              <Text key={i}>{getPieceSymbol(p, opponentColor)}</Text>
-            ))}
-            {capturedByPlayer.length === 0 && (
-              <Text style={{ color: colors.textTertiary }}>—</Text>
-            )}
-          </Text>
-        </View>
-        <View style={styles.capturedSection}>
-          <Text style={[styles.capturedLabel, { color: colors.textSecondary }]}>
-            Computer captured:
-          </Text>
-          <Text style={styles.capturedPieces}>
-            {capturedByEngine.map((p, i) => (
-              <Text key={i}>{getPieceSymbol(p, playerColor)}</Text>
-            ))}
-            {capturedByEngine.length === 0 && (
-              <Text style={{ color: colors.textTertiary }}>—</Text>
-            )}
-          </Text>
-        </View>
-      </View>
+      {/* Engine player (top) */}
+      <PlayerRow
+        label="Computer"
+        rating={engineElo[difficulty]}
+        color={opponentColor}
+        captured={capturedByEngine}
+        capturedColor={playerColor}
+        isThinking={isEngineThinking}
+      />
 
-      <View style={styles.movesSection}>
-        <Text style={[styles.movesTitle, { color: colors.text }]}>Moves</Text>
+      {/* Move list */}
+      <View style={[styles.movesSection, { borderBottomColor: colors.border }]}>
         <ScrollView
-          style={styles.movesScroll}
-          contentContainerStyle={styles.movesContent}
           horizontal
           showsHorizontalScrollIndicator={false}
+          style={styles.movesScroll}
+          contentContainerStyle={styles.movesContent}
         >
-          {moveList.map((move, i) => (
-            <Text
-              key={i}
-              style={[styles.moveItem, { color: colors.text }]}
-            >
-              {move}{' '}
-            </Text>
-          ))}
-          {moveList.length === 0 && (
-            <Text style={[styles.moveItem, { color: colors.textTertiary }]}>
-              —
+          {moveList.length > 0 ? (
+            moveList.map((move, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.moveChip,
+                  i % 2 === 0 && styles.moveChipWhite,
+                  { borderColor: colors.border },
+                ]}
+              >
+                <Text style={[styles.moveNumber, { color: colors.textTertiary }]}>
+                  {i % 2 === 0 ? `${Math.floor(i / 2) + 1}.` : ''}
+                </Text>
+                <Text style={[styles.moveText, { color: colors.text }]}>{move}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={[styles.noMoves, { color: colors.textTertiary }]}>
+              Game not started
             </Text>
           )}
         </ScrollView>
       </View>
 
-      <View style={[styles.actionsRow, { borderTopColor: colors.border }]}>
+      {/* Human player (bottom) */}
+      <PlayerRow
+        label="You"
+        rating={playerElo}
+        color={playerColor}
+        captured={capturedByPlayer}
+        capturedColor={opponentColor}
+      />
+
+      {/* Action buttons */}
+      <View style={[styles.actions, { borderTopColor: colors.border }]}>
         <Pressable
           onPress={flipBoard}
           style={({ pressed }) => [
-            styles.actionButton,
-            { borderColor: colors.border },
-            pressed && { opacity: 0.8 },
+            styles.iconBtn,
+            { backgroundColor: colors.border },
+            pressed && { opacity: 0.7 },
           ]}
         >
-          <Text style={[styles.actionText, { color: colors.text }]}>Flip</Text>
+          <Text style={[styles.iconBtnText, { color: colors.textSecondary }]}>⟳</Text>
         </Pressable>
+
         {undoEnabled && (
           <Pressable
             onPress={undoMove}
             style={({ pressed }) => [
-              styles.actionButton,
-              { borderColor: colors.border },
-              pressed && { opacity: 0.8 },
+              styles.iconBtn,
+              { backgroundColor: colors.border },
+              pressed && { opacity: 0.7 },
             ]}
           >
-            <Text style={[styles.actionText, { color: colors.text }]}>Undo</Text>
+            <Text style={[styles.iconBtnText, { color: colors.textSecondary }]}>↩</Text>
           </Pressable>
         )}
+
         <Pressable
           onPress={resetGame}
           style={({ pressed }) => [
-            styles.actionButton,
+            styles.newGameBtn,
             { backgroundColor: colors.primary },
-            pressed && { opacity: 0.9 },
+            pressed && { opacity: 0.85 },
           ]}
         >
-          <Text style={[styles.actionText, { color: '#fff' }]}>New Game</Text>
+          <Text style={styles.newGameText}>New Game</Text>
         </Pressable>
       </View>
     </View>
@@ -149,94 +175,114 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
     marginBottom: 16,
-    borderRadius: 12,
+    borderRadius: 10,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
   },
-  playersRow: {
+  playerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     borderBottomWidth: 1,
+    gap: 12,
   },
-  playerInfo: {
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+  },
+  playerMeta: {
     flex: 1,
   },
-  playerIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginBottom: 4,
-  },
-  playerName: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  rating: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  thinking: {
-    fontSize: 12,
-    fontStyle: 'italic',
-  },
-  capturedRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 12,
-    borderBottomWidth: 1,
-  },
-  capturedSection: {
+  playerNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
-  capturedLabel: {
-    fontSize: 12,
+  playerName: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  playerRating: {
+    fontSize: 13,
+  },
+  thinkingDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 999,
+    marginLeft: 4,
+    opacity: 0.9,
   },
   capturedPieces: {
-    fontSize: 16,
+    fontSize: 14,
+    marginTop: 2,
+    letterSpacing: 1,
   },
   movesSection: {
-    padding: 12,
-  },
-  movesTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 8,
+    borderBottomWidth: 1,
+    paddingVertical: 8,
   },
   movesScroll: {
-    maxHeight: 60,
+    maxHeight: 44,
   },
   movesContent: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  moveItem: {
-    fontSize: 13,
-    marginRight: 4,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    padding: 12,
-    gap: 12,
-    borderTopWidth: 1,
-  },
-  actionButton: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
     alignItems: 'center',
-    borderWidth: 1,
+    paddingHorizontal: 14,
+    gap: 2,
   },
-  actionText: {
-    fontSize: 14,
+  moveChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    borderRadius: 4,
+    gap: 2,
+  },
+  moveChipWhite: {},
+  moveNumber: {
+    fontSize: 12,
+  },
+  moveText: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  noMoves: {
+    fontSize: 13,
+    fontStyle: 'italic',
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    gap: 10,
+  },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconBtnText: {
+    fontSize: 18,
     fontWeight: '600',
+  },
+  newGameBtn: {
+    flex: 1,
+    height: 40,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  newGameText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
