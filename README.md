@@ -13,6 +13,10 @@ A complete, Chess.com-inspired mobile chess application built with React Native 
 - **Animations**: React Native Reanimated
 - **Navigation**: Expo Router (file-based)
 
+## App Screenshots:
+<img width="4320" height="2202" alt="screenshots" src="https://github.com/user-attachments/assets/b79673ed-89ae-4228-ba22-ff2ebbc95b92" />
+
+
 ### Feature-Based Folder Structure
 
 ```
