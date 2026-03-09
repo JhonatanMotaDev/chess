@@ -1,11 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Platform, Image, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInRight, LinearTransition } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/theme';
 import { useGameStore } from '@/store/gameStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import type { Difficulty } from '@/store/settingsStore';
+
+import WhiteKing from '../assets/pieces/wk.png';
+import BlackKing from '../assets/pieces/bk.png';
 
 const DIFFICULTIES: { key: Difficulty; label: string; elo: string }[] = [
   { key: 'beginner', label: 'Beginner', elo: '~800' },
@@ -20,211 +24,169 @@ export default function DifficultyScreen() {
   const { engineElo } = useSettingsStore();
   const initGame = useGameStore((s) => s.initGame);
 
-  const [selectedDifficulty, setSelectedDifficulty] =
-    React.useState<Difficulty>('intermediate');
+  const [selectedDifficulty, setSelectedDifficulty] = React.useState<Difficulty>('intermediate');
   const [selectedColor, setSelectedColor] = React.useState<'w' | 'b'>('w');
 
+  const handleSelectDifficulty = (key: Difficulty) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedDifficulty(key);
+  };
+
+  const handleSelectColor = (color: 'w' | 'b') => {
+    Haptics.selectionAsync();
+    setSelectedColor(color);
+  };
+
   const handleStart = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     initGame(selectedColor, selectedDifficulty);
     router.replace('/game/play');
   };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <Animated.View
-          entering={FadeInDown.delay(100).springify()}
-          style={styles.section}
-        >
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Choose Difficulty
-          </Text>
-          {DIFFICULTIES.map((d, i) => (
-            <Animated.View
-              key={d.key}
-              entering={FadeInDown.delay(150 + i * 50).springify()}
-            >
+      <Animated.View entering={FadeInDown.delay(100)} style={styles.header}>
+        <Text style={[styles.title, { color: colors.text }]}>Novo Jogo</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+          Escolha o nível do desafio
+        </Text>
+      </Animated.View>
+
+      <View style={styles.section}>
+        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Dificuldade</Text>
+        {DIFFICULTIES.map((d, i) => {
+          const isSelected = selectedDifficulty === d.key;
+          return (
+            <Animated.View key={d.key} entering={FadeInRight.delay(150 + i * 50)} layout={LinearTransition.springify()}>
               <Pressable
-                onPress={() => setSelectedDifficulty(d.key)}
-                style={[
+                onPress={() => handleSelectDifficulty(d.key)}
+                style={({ pressed }) => [
                   styles.option,
                   {
-                    backgroundColor:
-                      selectedDifficulty === d.key
-                        ? colors.primary
-                        : colors.surface,
-                    borderColor:
-                      selectedDifficulty === d.key
-                        ? colors.primary
-                        : colors.border,
+                    backgroundColor: isSelected ? colors.primary : colors.surface,
+                    borderColor: isSelected ? colors.primary : colors.border,
+                    transform: [{ scale: pressed ? 0.98 : 1 }],
                   },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.optionText,
-                    {
-                      color:
-                        selectedDifficulty === d.key ? '#fff' : colors.text,
-                    },
-                  ]}
-                >
-                  {d.label}
-                </Text>
-                <Text
-                  style={[
-                    styles.optionSubtext,
-                    {
-                      color:
-                        selectedDifficulty === d.key
-                          ? 'rgba(255,255,255,0.8)'
-                          : colors.textSecondary,
-                    },
-                  ]}
-                >
-                  Engine: {engineElo[d.key]} ELO
-                </Text>
+                <View>
+                  <Text style={[styles.optionText, { color: isSelected ? '#fff' : colors.text }]}>{d.label}</Text>
+                  <Text style={[styles.optionSubtext, { color: isSelected ? 'rgba(255,255,255,0.7)' : colors.textSecondary }]}>
+                    ELO {engineElo[d.key]}
+                  </Text>
+                </View>
+                {isSelected && <Text style={styles.checkIcon}>✓</Text>}
               </Pressable>
             </Animated.View>
-          ))}
-        </Animated.View>
+          );
+        })}
+      </View>
 
-        <Animated.View
-          entering={FadeInDown.delay(400).springify()}
-          style={styles.section}
-        >
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Play as
-          </Text>
-          <View style={styles.colorRow}>
-            <Pressable
-              onPress={() => setSelectedColor('w')}
-              style={[
-                styles.colorButton,
-                {
-                  backgroundColor:
-                    selectedColor === 'w' ? colors.primary : colors.surface,
-                  borderColor:
-                    selectedColor === 'w' ? colors.primary : colors.border,
-                },
-              ]}
-            >
-              <Text style={styles.pieceSymbol}>♔</Text>
-              <Text
-                style={[
-                  styles.colorButtonText,
-                  { color: selectedColor === 'w' ? '#fff' : colors.text },
-                ]}
-              >
-                White
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setSelectedColor('b')}
-              style={[
-                styles.colorButton,
-                {
-                  backgroundColor:
-                    selectedColor === 'b' ? colors.primary : colors.surface,
-                  borderColor:
-                    selectedColor === 'b' ? colors.primary : colors.border,
-                },
-              ]}
-            >
-              <Text style={styles.pieceSymbol}>♚</Text>
-              <Text
-                style={[
-                  styles.colorButtonText,
-                  { color: selectedColor === 'b' ? '#fff' : colors.text },
-                ]}
-              >
-                Black
-              </Text>
-            </Pressable>
-          </View>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(500).springify()}>
+          <Animated.View entering={FadeInDown.delay(400)} style={styles.section}>
+        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Jogar de</Text>
+        <View style={styles.colorRow}>
           <Pressable
-            onPress={handleStart}
-            style={({ pressed }) => [
-              styles.startButton,
-              { backgroundColor: colors.primary },
-              pressed && styles.startButtonPressed,
+            onPress={() => handleSelectColor('w')}
+            style={[
+              styles.colorButton,
+              {
+                backgroundColor: selectedColor === 'w' ? colors.primary : colors.surface,
+                borderColor: selectedColor === 'w' ? colors.primary : colors.border,
+              },
             ]}
           >
-            <Text style={styles.startButtonText}>Start Game</Text>
+            <Image source={WhiteKing} style={styles.pieceImage} resizeMode="contain" />
+            <Text style={[styles.colorButtonText, { color: selectedColor === 'w' ? '#fff' : colors.text }]}>Brancas</Text>
           </Pressable>
-        </Animated.View>
-      </ScrollView>
+
+          <Pressable
+            onPress={() => handleSelectColor('b')}
+            style={[
+              styles.colorButton,
+              {
+                backgroundColor: selectedColor === 'b' ? colors.primary : colors.surface,
+                borderColor: selectedColor === 'b' ? colors.primary : colors.border,
+              },
+            ]}
+          >
+            <Image source={BlackKing} style={styles.pieceImage} resizeMode="contain" />
+            <Text style={[styles.colorButtonText, { color: selectedColor === 'b' ? '#fff' : colors.text }]}>Pretas</Text>
+          </Pressable>
+        </View>
+      </Animated.View>
+
+      <Animated.View entering={FadeInDown.delay(500)} style={styles.footer}>
+        <Pressable
+          onPress={handleStart}
+          style={({ pressed }) => [
+            styles.startButton,
+            { backgroundColor: colors.primary, opacity: pressed ? 0.9 : 1 },
+          ]}
+        >
+          <Text style={styles.startButtonText}>Começar</Text>
+        </Pressable>
+      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { 
+    flex: 1, 
+    paddingHorizontal: 24, 
+    paddingTop: Platform.OS === 'ios' ? 20 : 10,
+    justifyContent: 'space-between',
+    paddingBottom: 40,
   },
-  scrollContent: {
-    padding: 24,
-    paddingTop: 48,
+  header: {
+    marginTop: 20,
+    marginBottom: 10,
   },
-  section: {
-    marginBottom: 32,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
+  title: { fontSize: 28, fontWeight: '800', letterSpacing: -0.5 },
+  subtitle: { fontSize: 14, opacity: 0.7, marginTop: 2 },
+  section: { marginVertical: 10 },
+  sectionLabel: { 
+    fontSize: 11, 
+    fontWeight: '700', 
+    letterSpacing: 1, 
+    marginBottom: 10, 
+    textTransform: 'uppercase' 
   },
   option: {
-    padding: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 2,
-  },
-  optionText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  optionSubtext: {
-    fontSize: 12,
-    marginTop: 4,
-  },
-  colorRow: {
+    marginBottom: 8,
+    borderWidth: 1.5,
     flexDirection: 'row',
-    gap: 16,
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
+  optionText: { fontSize: 16, fontWeight: '700' },
+  optionSubtext: { fontSize: 12, marginTop: 1 },
+  checkIcon: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  colorRow: { flexDirection: 'row', gap: 12 },
   colorButton: {
     flex: 1,
-    padding: 20,
-    borderRadius: 12,
+    paddingVertical: 12,
+    borderRadius: 16,
     alignItems: 'center',
-    borderWidth: 2,
+    justifyContent: 'center',
+    borderWidth: 1.5,
   },
-  pieceSymbol: {
-    fontSize: 32,
-    marginBottom: 8,
+  pieceImage: {
+    width: 44,
+    height: 44,
+    marginBottom: 4,
   },
-  colorButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+  colorButtonText: { fontSize: 14, fontWeight: '700' },
+  footer: {
+    marginTop: 'auto',
   },
   startButton: {
     padding: 18,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: 'center',
-    marginTop: 24,
   },
-  startButtonPressed: {
-    opacity: 0.9,
-  },
-  startButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
+  startButtonText: { color: '#fff', fontSize: 18, fontWeight: '800' },
 });

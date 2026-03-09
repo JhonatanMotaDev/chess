@@ -53,7 +53,7 @@ function GamePanelComponent() {
           },
         ]}
       >
-        <Text style={{ fontSize: 16 }}>{color === 'w' ? '♔' : '♚'}</Text>
+        <Text style={{ fontSize: 16 }}>{color === 'w' ? '👑' : '👑'}</Text>
       </View>
       <View style={styles.playerMeta}>
         <View style={styles.playerNameRow}>
@@ -77,7 +77,6 @@ function GamePanelComponent() {
   return (
     <View style={[styles.container, { backgroundColor: colors.surface }]}>
 
-      {/* Engine player (top) */}
       <PlayerRow
         label="Computer"
         rating={engineElo[difficulty]}
@@ -87,39 +86,6 @@ function GamePanelComponent() {
         isThinking={isEngineThinking}
       />
 
-      {/* Move list */}
-      <View style={[styles.movesSection, { borderBottomColor: colors.border }]}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.movesScroll}
-          contentContainerStyle={styles.movesContent}
-        >
-          {moveList.length > 0 ? (
-            moveList.map((move, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.moveChip,
-                  i % 2 === 0 && styles.moveChipWhite,
-                  { borderColor: colors.border },
-                ]}
-              >
-                <Text style={[styles.moveNumber, { color: colors.textTertiary }]}>
-                  {i % 2 === 0 ? `${Math.floor(i / 2) + 1}.` : ''}
-                </Text>
-                <Text style={[styles.moveText, { color: colors.text }]}>{move}</Text>
-              </View>
-            ))
-          ) : (
-            <Text style={[styles.noMoves, { color: colors.textTertiary }]}>
-              Game not started
-            </Text>
-          )}
-        </ScrollView>
-      </View>
-
-      {/* Human player (bottom) */}
       <PlayerRow
         label="You"
         rating={playerElo}
@@ -128,7 +94,6 @@ function GamePanelComponent() {
         capturedColor={opponentColor}
       />
 
-      {/* Action buttons */}
       <View style={[styles.actions, { borderTopColor: colors.border }]}>
         <Pressable
           onPress={flipBoard}
@@ -138,21 +103,8 @@ function GamePanelComponent() {
             pressed && { opacity: 0.7 },
           ]}
         >
-          <Text style={[styles.iconBtnText, { color: colors.textSecondary }]}>⟳</Text>
+          <Text style={[styles.iconBtnText, { color: colors.textSecondary }]}>Flip</Text>
         </Pressable>
-
-        {undoEnabled && (
-          <Pressable
-            onPress={undoMove}
-            style={({ pressed }) => [
-              styles.iconBtn,
-              { backgroundColor: colors.border },
-              pressed && { opacity: 0.7 },
-            ]}
-          >
-            <Text style={[styles.iconBtnText, { color: colors.textSecondary }]}>↩</Text>
-          </Pressable>
-        )}
 
         <Pressable
           onPress={resetGame}
@@ -173,9 +125,8 @@ export const GamePanel = memo(GamePanelComponent);
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
     marginBottom: 16,
-    borderRadius: 10,
+    borderRadius: 0,
     overflow: 'hidden',
   },
   playerRow: {
@@ -270,8 +221,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconBtnText: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '300',
   },
   newGameBtn: {
     flex: 1,

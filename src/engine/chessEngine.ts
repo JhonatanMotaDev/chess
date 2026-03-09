@@ -12,10 +12,6 @@ export interface EngineResult {
   san: string;
 }
 
-/**
- * Converts js-chess-engine HistoryEntry format to chess.js compatible format.
- * HistoryEntry is like { "E2": "E4" } - keys/values may be uppercase.
- */
 function parseHistoryEntry(entry: Record<string, string>): { from: string; to: string } | null {
   const entries = Object.entries(entry);
   if (entries.length === 0) return null;
@@ -26,10 +22,6 @@ function parseHistoryEntry(entry: Record<string, string>): { from: string; to: s
   };
 }
 
-/**
- * Get AI move from current FEN position.
- * Uses human-like settings: randomness and optional delay.
- */
 export function getEngineMove(
   fen: string,
   difficulty: Difficulty
@@ -49,7 +41,6 @@ export function getEngineMove(
     throw new Error('Engine returned invalid move');
   }
 
-  // Simulate thinking time - more complex positions get longer delay
   const delayMs =
     delayRange.min +
     Math.random() * (delayRange.max - delayRange.min);
@@ -58,7 +49,7 @@ export function getEngineMove(
     move: {
       from: parsed.from,
       to: parsed.to,
-      san: `${parsed.from}-${parsed.to}`, // Will be converted by chess.js to proper SAN
+      san: `${parsed.from}-${parsed.to}`,
     },
     delayMs,
   };

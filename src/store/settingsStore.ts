@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type Theme = 'light' | 'dark';
@@ -27,6 +28,10 @@ const defaultEngineElo: Record<Difficulty, number> = {
   master: 2200,
 };
 
+const storage = Platform.OS === 'web'
+  ? createJSONStorage(() => localStorage)
+  : createJSONStorage(() => AsyncStorage);
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
@@ -44,7 +49,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'chess-settings',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage,
       partialize: (state) => ({
         theme: state.theme,
         soundEnabled: state.soundEnabled,

@@ -36,7 +36,6 @@ function ChessSquareComponent({
       onPress={onPress}
       style={[styles.square, { backgroundColor: bgColor }]}
     >
-      {/* Last move tint */}
       {isLastMove && !isSelected && !isCheck && (
         <View
           style={[
@@ -46,7 +45,6 @@ function ChessSquareComponent({
         />
       )}
 
-      {/* Selected highlight */}
       {isSelected && (
         <View
           style={[
@@ -56,7 +54,6 @@ function ChessSquareComponent({
         />
       )}
 
-      {/* Check highlight */}
       {isCheck && (
         <View
           style={[
@@ -66,7 +63,6 @@ function ChessSquareComponent({
         />
       )}
 
-      {/* Legal move indicators — dot if empty, ring if has piece */}
       {isHighlighted && !isSelected && (
         <View style={styles.dotWrap} pointerEvents="none">
           {hasPiece ? (

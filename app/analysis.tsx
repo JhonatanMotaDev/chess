@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, FlatList } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/theme';
 import { useGameStore } from '@/store/gameStore';
@@ -9,9 +9,9 @@ export default function AnalysisScreen() {
   const chess = useGameStore((s) => s.chess);
   const moveHistory = useGameStore((s) => s.moveHistory);
   const playerColor = useGameStore((s) => s.playerColor);
+  const capturedPieces = useGameStore((s) => s.capturedPieces);
 
-  // Simplified accuracy - in full implementation would use engine analysis
-  const accuracy = 85; // Placeholder
+  const accuracy = 85;
 
   return (
     <ScrollView
@@ -42,6 +42,31 @@ export default function AnalysisScreen() {
         </Text>
         <Text style={[styles.pgn, { color: colors.textSecondary }]}>
           {chess.pgn() || 'No moves yet'}
+        </Text>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          Move History
+        </Text>
+        <FlatList
+          data={moveHistory}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <Text style={{ color: colors.text }}>{item}</Text>
+          )}
+        />
+      </View>
+
+      <View style={[styles.card, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          Captured Pieces
+        </Text>
+        <Text style={{ color: colors.text }}>
+          White: {capturedPieces.w.join(', ')}
+        </Text>
+        <Text style={{ color: colors.text }}>
+          Black: {capturedPieces.b.join(', ')}
         </Text>
       </View>
     </ScrollView>

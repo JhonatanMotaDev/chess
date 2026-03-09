@@ -20,7 +20,7 @@ function ChessBoardComponent() {
   const selectSquare = useGameStore((s) => s.selectSquare);
 
   const squares = getBoardSquares(boardFlipped);
-  const boardSize = Dimensions.get('window').width - 32;
+  const boardSize = Dimensions.get('window').width - 4;
 
   const fileOrder = boardFlipped ? [...FILES].reverse() : FILES;
   const rankOrder = boardFlipped ? [...RANKS].reverse() : RANKS;
@@ -56,7 +56,6 @@ function ChessBoardComponent() {
           chess.inCheck() &&
           piece.color === chess.turn();
 
-        // Coordinates embedded inside edge squares — like Chess.com
         const showRank = fileIdx === 0;
         const showFile = rankIdx === 7;
         const coordColor = isLight ? colors.boardDark : colors.boardLight;
@@ -74,7 +73,6 @@ function ChessBoardComponent() {
               onPress={() => handleSquarePress(square)}
             />
 
-            {/* Rank label — top-left of left-edge squares */}
             {showRank && (
               <Text
                 style={[styles.coordRank, { color: coordColor }]}
@@ -84,7 +82,6 @@ function ChessBoardComponent() {
               </Text>
             )}
 
-            {/* File label — bottom-right of bottom-edge squares */}
             {showFile && (
               <Text
                 style={[styles.coordFile, { color: coordColor }]}
@@ -94,7 +91,6 @@ function ChessBoardComponent() {
               </Text>
             )}
 
-            {/* Piece rendered on top */}
             {piece && (
               <View style={StyleSheet.absoluteFill} pointerEvents="none">
                 <View style={styles.pieceContainer}>

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Chess } from 'chess.js';
+
 import type { Difficulty } from './settingsStore';
 import type { Square } from '@/types/chess';
 import { getEngineMove, getBookMove } from '@/engine';
@@ -63,7 +64,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       moveHistory: [],
     });
 
-    // If player is black, engine moves first
     if (playerColor === 'b') {
       setTimeout(() => get().makeEngineMove(), 500);
     }
@@ -77,13 +77,11 @@ export const useGameStore = create<GameState>((set, get) => ({
     const piece = chess.get(square);
     const { selectedSquare, legalMoves } = get();
 
-    // If clicking same square, deselect
     if (selectedSquare === square) {
       set({ selectedSquare: null, legalMoves: [] });
       return;
     }
 
-    // If clicking a legal move target
     if (legalMoves.includes(square) && selectedSquare) {
       const pieceToMove = chess.get(selectedSquare);
       const isPromotion =
@@ -99,12 +97,10 @@ export const useGameStore = create<GameState>((set, get) => ({
         return;
       }
     
-      // ❗ DO NOT call chess.move here
       get().makeMove(selectedSquare, square);
       return;
     }
 
-    // If clicking own piece, select it
     if (piece && piece.color === playerColor) {
       const moves = chess.moves({ square, verbose: true });
       set({
@@ -117,7 +113,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   makeMove: (from, to, promotion) => {
-    const { chess, playerColor, difficulty, capturedPieces } = get();
+    const { chess, playerColor, capturedPieces } = get();
   
     const piece = chess.get(from);
     const isPromotion =
@@ -168,7 +164,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ isEngineThinking: true });
 
     try {
-      // Check opening book first (only for first few moves)
       const moveCount = chess.history().length;
       let moveResult: { from: string; to: string; delayMs?: number } | null = null;
 
@@ -191,8 +186,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         };
       }
 
-      // Simulate thinking delay
-      await new Promise((r) => setTimeout(r, moveResult.delayMs || 1000));
+      await new Promise((r) => setTimeout(r, moveResult.delayMs || 100));
 
       const chessInstance = get().chess;
       const move = chessInstance.move({
@@ -244,7 +238,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { chess, playerColor, moveHistory } = get();
     if (moveHistory.length === 0) return;
 
-    // Undo last two moves (player + engine) if it's player's turn
     const chessCopy = new Chess(chess.fen());
     const undos = chess.turn() === playerColor ? 2 : 1;
 

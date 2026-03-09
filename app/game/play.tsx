@@ -17,7 +17,6 @@ export default function GameScreen() {
   const playerColor = useGameStore((s) => s.playerColor);
   const difficulty = useGameStore((s) => s.difficulty);
 
-  // Ensure game is initialized (in case user navigated directly)
   useEffect(() => {
     if (chess.fen().includes('8/8/8/8/8/8/8/8')) {
       initGame('w', 'intermediate');
@@ -31,10 +30,10 @@ export default function GameScreen() {
     >
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Text style={[styles.backText, { color: colors.primary }]}>← Back</Text>
+          <Text style={[styles.backText, { color: colors.primary }]}>Menu</Text>
         </Pressable>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          vs Computer ({difficulty})
+          Player vs Computer ({difficulty})
         </Text>
         <View style={styles.backButton} />
       </View>
@@ -56,6 +55,7 @@ export default function GameScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 32,
   },
   header: {
     flexDirection: 'row',
@@ -66,11 +66,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   backButton: {
-    minWidth: 60,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 2,
   },
   backText: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#007AFF',
+    marginLeft: 2,
   },
   headerTitle: {
     fontSize: 16,

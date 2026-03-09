@@ -11,7 +11,7 @@ interface ChessPieceProps {
   isDragging?: boolean;
 }
 
-const PIECE_IMAGES: Record<string, any> = {
+const PIECE_IMAGES: Record<string, ReturnType<typeof require>> = {
   wk: require('../../../assets/pieces/wk.png'),
   wq: require('../../../assets/pieces/wq.png'),
   wr: require('../../../assets/pieces/wr.png'),

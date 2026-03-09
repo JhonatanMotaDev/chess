@@ -1,40 +1,51 @@
-// Chess.com-inspired color palette
 export const lightColors = {
-  background: '#1a1a1a',
-  surface: '#262421',
-  text: '#f0ead8',
-  textSecondary: '#b8a890',
-  textTertiary: '#7a7264',
-  primary: '#81b64c',
-  primaryDark: '#5f8f30',
-  border: '#3d3530',
-  boardLight: '#eeeed2',
-  boardDark: '#769656',
-  boardHighlight: '#f6f669',
-  boardLastMove: '#cdd26a',
-  capturedLight: '#3d3530',
-  capturedDark: '#e0d8c8',
-  check: '#e74c3c',
-  promotion: 'rgba(0,0,0,0.8)',
+  background: 'rgb(242, 242, 236)',
+  surface: 'rgb(255, 255, 255)',
+  text: 'rgb(0, 128, 28)',
+  textSecondary: 'rgb(0, 0, 0)',
+  textTertiary: 'rgb(0, 144, 31)',
+
+  primary: 'rgb(129, 182, 76)',
+  primaryDark: 'rgb(106, 154, 61)',
+
+  border: 'rgb(208, 208, 208)',
+  boardLight: 'rgb(245, 240, 240)',
+  boardDark: 'rgb(48, 99, 70)',
+
+  boardHighlight: 'rgb(255, 231, 77)',
+  boardLastMove: 'rgb(209, 255, 91)',
+
+  capturedLight: 'rgb(214, 214, 214)',
+  capturedDark: 'rgb(61, 61, 61)',
+
+  check: 'rgb(231, 76, 60)',
+  promotion: 'rgba(0, 0, 0, 0.6)',
 };
 
 export const darkColors = {
-  background: '#121212',
-  surface: '#1e1e1e',
-  text: '#f5f5f5',
-  textSecondary: '#b0b0b0',
-  textTertiary: '#808080',
-  primary: '#4caf50',
-  primaryDark: '#388e3c',
-  border: '#333333',
-  boardLight: '#eeeed2',
-  boardDark: '#769656',
-  boardHighlight: '#fc97f',
-  boardLastMove: '#baca44',
-  capturedLight: '#3d3d3d',
-  capturedDark: '#e0e0e0',
-  check: '#e57373',
-  promotion: 'rgba(255,255,255,0.3)',
+  background: 'rgb(13, 13, 13)',
+  surface: 'rgb(28, 28, 30)',
+
+  text: 'rgb(255, 255, 255)',
+  textSecondary: 'rgb(142, 142, 147)',
+  textTertiary: 'rgb(99, 99, 102)',
+
+  primary: 'rgb(0, 146, 63)',
+  primaryDark: 'rgb(106, 154, 61)',
+
+  border: 'rgb(44, 44, 46)',
+
+  boardLight: 'rgb(238, 238, 210)',
+  boardDark: 'rgb(48, 99, 70)',
+
+  boardHighlight: 'rgb(255, 231, 77)',
+  boardLastMove: 'rgb(209, 255, 91)',
+
+  capturedLight: 'rgb(58, 58, 58)',
+  capturedDark: 'rgb(232, 232, 232)',
+
+  check: 'rgb(255, 107, 107)',
+  promotion: 'rgba(0, 0, 0, 0.8)',
 };
 
 export type ColorScheme = typeof lightColors;

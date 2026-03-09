@@ -10,10 +10,10 @@ export const DIFFICULTY_TO_LEVEL: Record<Difficulty, EngineLevel> = {
 };
 
 export const DIFFICULTY_RANDOMNESS: Record<Difficulty, number> = {
-  beginner: 150,
-  intermediate: 80,
-  advanced: 40,
-  master: 15,
+  beginner: 200,
+  intermediate: 50,
+  advanced: 10,
+  master: 0,
 };
 
 export const DIFFICULTY_DELAY_MS: Record<Difficulty, { min: number; max: number }> = {
