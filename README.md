@@ -65,13 +65,10 @@ src/
 ## Getting Started
 
 ```bash
-# Install dependencies
 npm install
 
-# Start development server
 npm start
 
-# Run on specific platform
 npm run android
 npm run ios
 npm run web
